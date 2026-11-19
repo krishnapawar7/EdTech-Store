@@ -1,6 +1,6 @@
 # 🎓 EdTech Store — Full-Stack E-Commerce & Entitlements Application
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?style=flat&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat&logo=prisma&logoColor=white)](https://www.prisma.io/)
@@ -89,7 +89,7 @@ Built for the **Intern Assessment: Ed-Tech App**.
   $$\text{Base Taxable Amount} = \text{round}\left(\frac{T}{1.18}\right)$$
   $$\text{Total GST} = T - \text{Base Amount}$$
   $$\text{CGST (9\%)} = \text{round}\left(\frac{\text{Total GST}}{2}\right), \quad \text{SGST (9\%)} = \text{Total GST} - \text{CGST}$$
-- The split is calculated in `src/lib/pricing.ts` and shown itemized on the checkout cart and the printable GST tax invoice.
+- The split is calculated in `src/lib/pricing.js` and shown itemized on the checkout cart and the printable GST tax invoice.
 
 ### 7. Dual Database Engine Flexibility
 - Works out-of-the-box with zero setup using **SQLite** (`dev.db`).
@@ -356,22 +356,22 @@ npm test
 ```
 
 ### Verified Test Cases (23 Passing Tests)
-1. **Price Calculation (`tests/pricing.test.ts`)**:
+1. **Price Calculation (`tests/pricing.test.js`)**:
    - 18% inclusive GST calculation on ₹49 (4900 paise → 4153 base + 747 tax).
    - 18% inclusive GST calculation on ₹499 (49900 paise → 42288 base + 7612 tax).
    - Flat coupon discount with minimum order threshold.
    - Percentage coupon discount with maximum discount cap.
    - Rejection of expired, disabled, or limit-exhausted coupons.
-2. **Signature Verification (`tests/signature.test.ts`)**:
+2. **Signature Verification (`tests/signature.test.js`)**:
    - HMAC-SHA256 signature verification matching `order_id + "|" + payment_id`.
    - Rejection of tampered signatures.
    - Rejection of tampered payment IDs or order IDs.
    - Webhook raw body signature verification with `X-Razorpay-Signature`.
-3. **Idempotency & Webhooks (`tests/webhooks.test.ts`)**:
+3. **Idempotency & Webhooks (`tests/webhooks.test.js`)**:
    - Successful settlement on first arrival granting entitlements.
    - Duplicate arrival idempotency (access granted exactly once, order not counted twice).
    - Amount check: tampered or underpaid amounts rejected and logged.
-4. **Access Checks (`tests/access.test.ts`)**:
+4. **Access Checks (`tests/access.test.js`)**:
    - Free sample chapter accessible to signed-in students.
    - Server strictly refuses locked content (HTTP 403 Forbidden).
    - Chapter entitlement unlocks chapter.
