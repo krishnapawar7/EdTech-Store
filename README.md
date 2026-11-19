@@ -9,8 +9,6 @@
 
 A production-ready full-stack Ed-Tech application where students browse CBSE curriculum study materials, buy content per chapter, per subject, or as a monthly/annual all-access pass, pay via UPI / Card through Razorpay, and receive verified access immediately upon confirmation.
 
-Built for the **Intern Assessment: Ed-Tech App**.
-
 ---
 
 ## 📑 Table of Contents
