@@ -1,0 +1,3 @@
+{
+  "buildCommand": "npm run db:use-postgres && npm run build"
+}

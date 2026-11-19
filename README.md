@@ -19,6 +19,7 @@ Built for the **Intern Assessment: Ed-Tech App**.
 - [📊 Entity-Relationship (ER) Diagram](#-entity-relationship-er-diagram)
 - [💳 Razorpay Payment Architecture](#-razorpay-payment-architecture)
 - [🚀 Quickstart & Setup Guide](#-quickstart--setup-guide)
+- [☁️ Deploy to Vercel](#-deploy-to-vercel)
 - [🧪 Automated Test Suite](#-automated-test-suite)
 - [👤 Seed Accounts & Test Credentials](#-seed-accounts--test-credentials)
 - [🎥 5-Minute Walkthrough Guide](#-5-minute-walkthrough-guide)
@@ -314,7 +315,7 @@ Copy the template environment file:
 ```bash
 cp .env.example .env
 ```
-Default `.env` configuration (ready to run):
+Example `.env` configuration. Replace placeholder values before use:
 ```env
 DATABASE_URL="file:./dev.db"
 JWT_SECRET="edtech-secure-jwt-secret-key-32-chars-long-development"
@@ -323,14 +324,18 @@ RAZORPAY_KEY_SECRET="placeholderSecretKey123"
 RAZORPAY_WEBHOOK_SECRET="placeholderWebhookSecret123"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_RAZORPAY_KEY_ID="rzp_test_placeholderKey"
+ADMIN_SEED_PASSWORD="Admin@123"
+STUDENT_SEED_PASSWORD="Student@123"
 ```
+These credentials are for local development only. Replace them with unique passwords outside your local machine.
 
 ### 4. Database Setup & Seeding
-Push the database schema and populate seed data:
+For local development, set `ADMIN_SEED_PASSWORD` and `STUDENT_SEED_PASSWORD` in `.env`, push the schema, and populate seed data:
 ```bash
 npm run prisma:push
 npm run seed
 ```
+The seed command clears existing database records before recreating the demo catalogue and accounts. Run it only against a new or disposable database.
 
 *(Optional: If running with PostgreSQL via Docker)*
 ```bash
@@ -345,6 +350,22 @@ npm run seed
 npm run dev
 ```
 Open **[http://localhost:3000](http://localhost:3000)** in your browser!
+
+---
+
+## ☁️ Deploy to Vercel
+
+1. Import `krishnapawar7/EdTech-Store` from the Vercel dashboard and keep the repository root as the project root.
+2. Connect a persistent PostgreSQL database to the Vercel project and set its `DATABASE_URL` for Production and Preview. The included `vercel.json` selects the PostgreSQL Prisma schema during Vercel builds.
+3. Add these environment variables in Vercel Project Settings. Use real values; do not copy the placeholders from `.env.example`.
+   - `JWT_SECRET` — a private, randomly generated secret (at least 32 characters).
+   - `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` — credentials from your Razorpay dashboard.
+   - `NEXT_PUBLIC_RAZORPAY_KEY_ID` — the matching Razorpay key ID.
+   - `NEXT_PUBLIC_APP_URL` — the deployed site's HTTPS URL.
+4. Deploy the project. Set the Razorpay webhook URL to `https://<your-domain>/api/webhooks/razorpay`.
+5. Initialize a new production database once by running `npm run db:use-postgres` and `npm run prisma:push` with the production `DATABASE_URL` configured locally. To populate demo catalogue data, set unique `ADMIN_SEED_PASSWORD` and `STUDENT_SEED_PASSWORD` values and run `npm run seed`; seeding deletes existing database records.
+
+Never commit database URLs, JWT secrets, or Razorpay secrets. Keep Razorpay in Test Mode until you are ready to accept real payments.
 
 ---
 
@@ -384,14 +405,14 @@ npm test
 
 ## 👤 Seed Accounts & Test Credentials
 
-The database comes pre-seeded with:
+The seed script creates these accounts. Set their passwords locally using `ADMIN_SEED_PASSWORD` and `STUDENT_SEED_PASSWORD` before running `npm run seed`.
 
-| Role | Email | Password | Details |
+| Role | Email | Password source | Details |
 | :--- | :--- | :--- | :--- |
-| **Student** | `student@edstore.com` | `Student@123` | Rahul Sharma (Student Account) |
-| **Admin** | `admin@edstore.com` | `Admin@123` | Admin Instructor (Full Admin Console Access) |
+| **Student** | `student@edstore.com` | `STUDENT_SEED_PASSWORD` | Rahul Sharma (Student Account) |
+| **Admin** | `admin@edstore.com` | `ADMIN_SEED_PASSWORD` | Admin Instructor (Full Admin Console Access) |
 
-> 💡 **Quick Switcher:** Click the **"🧑‍🎓 Student Mode"** or **"👑 Admin Mode"** pills in the top banner of the app to switch accounts instantly with 1-click!
+> 💡 **Local demo only:** The quick-switch controls are available in development. Production accounts use the private passwords supplied through `ADMIN_SEED_PASSWORD` and `STUDENT_SEED_PASSWORD`.
 
 ### Catalogue Seed Data
 - **1 Board:** CBSE

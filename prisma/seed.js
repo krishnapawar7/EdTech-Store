@@ -2,6 +2,12 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 async function main() {
+    const adminSeedPassword = process.env.ADMIN_SEED_PASSWORD;
+    const studentSeedPassword = process.env.STUDENT_SEED_PASSWORD;
+    if (!adminSeedPassword || !studentSeedPassword) {
+        throw new Error("Set ADMIN_SEED_PASSWORD and STUDENT_SEED_PASSWORD before seeding.");
+    }
+
     console.log("🌱 Starting database seeding...");
     // Clear existing data in correct order
     await prisma.manualAccessLog.deleteMany({});
@@ -19,8 +25,8 @@ async function main() {
     await prisma.board.deleteMany({});
     await prisma.user.deleteMany({});
     // 1. Seed Users
-    const adminPassword = await bcrypt.hash("Admin@123", 10);
-    const studentPassword = await bcrypt.hash("Student@123", 10);
+    const adminPassword = await bcrypt.hash(adminSeedPassword, 10);
+    const studentPassword = await bcrypt.hash(studentSeedPassword, 10);
     const admin = await prisma.user.create({
         data: {
             email: "admin@edstore.com",
@@ -316,7 +322,8 @@ async function main() {
     console.log("   - 30 Chapters (5 per subject, with 1 Free Sample per subject)");
     console.log("   - Products for all Chapters (₹49), Subjects (₹499), Monthly Pass (₹299), Annual Pass (₹2499), and STEM Bundle (₹1199)");
     console.log("   - 3 Active Discount Coupons: WELCOME50, EDTECH20, PASS500");
-    console.log("   - Credentials: Admin (admin@edstore.com / Admin@123), Student (student@edstore.com / Student@123)");
+    console.log("   - Admin account: admin@edstore.com (password provided through ADMIN_SEED_PASSWORD)");
+    console.log("   - Student account: student@edstore.com (password provided through STUDENT_SEED_PASSWORD)");
 }
 main()
     .catch((e) => {

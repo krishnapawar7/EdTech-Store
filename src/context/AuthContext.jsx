@@ -60,6 +60,10 @@ export function AuthProvider({ children }) {
         setOwnership({ ownedClassIds: [], ownedSubjectIds: [], ownedChapterIds: [] });
     };
     const switchToRole = async (role) => {
+        if (process.env.NODE_ENV === "production") {
+            return;
+        }
+
         const creds = role === "ADMIN"
             ? { email: "admin@edstore.com", password: "Admin@123" }
             : { email: "student@edstore.com", password: "Student@123" };

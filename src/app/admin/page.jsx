@@ -116,7 +116,7 @@ export default function AdminPage() {
           You must be signed in as an administrator to access the admin console.
         </p>
         <p className="text-xs text-slate-400">
-          Click &ldquo;👑 Admin Mode&rdquo; on the top demo banner to switch immediately.
+          Sign in with an administrator account to access the admin console.
         </p>
       </div>);
     }

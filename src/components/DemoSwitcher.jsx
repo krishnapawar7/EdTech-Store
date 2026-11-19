@@ -3,6 +3,10 @@ import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { ShieldCheck, User } from "lucide-react";
 export function DemoSwitcher() {
+    if (process.env.NODE_ENV === "production") {
+        return null;
+    }
+
     const { user, switchToRole, logout } = useAuth();
     return (<div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white text-xs py-2 px-4 border-b border-indigo-900/50 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
