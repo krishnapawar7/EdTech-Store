@@ -55,7 +55,7 @@ export default function HomePage() {
     const selectedClass = activeClasses[selectedClassIndex] || activeClasses[0];
     // Check if student owns class pass
     const hasClassPass = selectedClass && ownership.ownedClassIds.includes(selectedClass.id);
-    return (<div className="min-h-screen bg-slate-50/60 pb-20">
+    return (<div className="min-h-screen bg-slate-50/60 pb-8">
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-indigo-900 via-indigo-800 to-slate-900 text-white pt-12 pb-16 px-4 sm:px-6 lg:px-8 shadow-inner">
         <div className="max-w-5xl mx-auto text-center space-y-4">
