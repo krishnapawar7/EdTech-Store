@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String            @id @default(uuid())
+  email        String            @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         String            @default("STUDENT") // "STUDENT" | "ADMIN"
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  orders       Order[]
+  entitlements Entitlement[]
+  adminLogs    ManualAccessLog[] @relation("AdminUser")
+  targetedLogs ManualAccessLog[] @relation("TargetUser")
+}
+
+model Board {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  classes     Class[]
+}
+
+model Class {
+  id          String    @id @default(uuid())
+  boardId     String
+  name        String
+  slug        String
+  gradeNumber Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  board       Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  subjects    Subject[]
+  products    Product[]
+}
+
+model Subject {
+  id        String    @id @default(uuid())
+  classId   String
+  name      String
+  slug      String
+  icon      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  class     Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  chapters  Chapter[]
+  products  Product[]
+}
+
+model Chapter {
+  id            String     @id @default(uuid())
+  subjectId     String
+  name          String
+  slug          String
+  chapterNumber Int
+  isFree        Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  subject       Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  materials     Material[]
+  products      Product[]
+}
+
+model Material {
+  id        String   @id @default(uuid())
+  chapterId String
+  title     String
+  type      String   @default("PDF") // "PDF" | "VIDEO" | "QUIZ"
+  fileUrl   String?
+  filePath  String?
+  content   String?
+  sizeBytes Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id               String      @id @default(uuid())
+  type             String      // "CHAPTER_NOTES" | "SUBJECT_PACK" | "MONTHLY_PASS" | "ANNUAL_PASS" | "BUNDLE"
+  title            String
+  description      String?
+  accessLengthDays Int?        // null = Lifetime, 30 = Monthly, 365 = Annual
+  classId          String?
+  subjectId        String?
+  chapterId        String?
+  bundleItemIds    String?     // JSON string array of IDs
+  isActive         Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  class            Class?      @relation(fields: [classId], references: [id], onDelete: SetNull)
+  subject          Subject?    @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  chapter          Chapter?    @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  prices           Price[]
+  orderItems       OrderItem[]
+}
+
+model Price {
+  id          String   @id @default(uuid())
+  productId   String
+  amountPaise Int      // Stored in paise
+  currency    String   @default("INR")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Coupon {
+  id               String    @id @default(uuid())
+  code             String    @unique
+  discountType     String    // "FLAT" | "PERCENTAGE"
+  discountValue    Int       // paise if FLAT, percentage integer if PERCENTAGE
+  maxDiscountPaise Int?
+  minOrderPaise    Int?
+  maxUses          Int?
+  usedCount        Int       @default(0)
+  expiresAt        DateTime?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  orders           Order[]
+}
+
+model Order {
+  id                 String        @id @default(uuid())
+  orderNumber        String        @unique
+  userId             String
+  subtotalPaise      Int
+  upgradeCreditPaise Int           @default(0)
+  discountPaise      Int           @default(0)
+  taxPaise           Int
+  totalPaise         Int
+  status             String        @default("CREATED") // "CREATED" | "PENDING" | "PAID" | "FAILED" | "CANCELLED"
+  couponId           String?
+  razorpayOrderId    String?       @unique
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon             Coupon?       @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  orderItems         OrderItem[]
+  payments           Payment[]
+  entitlements       Entitlement[]
+}
+
+model OrderItem {
+  id                 String   @id @default(uuid())
+  orderId            String
+  productId          String
+  unitPricePaise     Int
+  upgradeCreditPaise Int      @default(0)
+  finalPricePaise    Int
+  title              String
+
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id                String   @id @default(uuid())
+  orderId           String
+  razorpayPaymentId String?  @unique
+  razorpayOrderId   String?
+  amountPaise       Int
+  status            String   // "PENDING" | "SUCCESS" | "FAILED"
+  paymentMethod     String?
+  signature         String?
+  rawPayload        String?
+  failureReason     String?
+  createdAt         DateTime @default(now())
+
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model WebhookEvent {
+  id           String    @id @default(uuid())
+  eventId      String?   @unique
+  eventType    String
+  payloadJson  String
+  signature    String?
+  isProcessed  Boolean   @default(false)
+  processedAt  DateTime?
+  errorMessage String?
+  createdAt    DateTime  @default(now())
+}
+
+model Entitlement {
+  id            String    @id @default(uuid())
+  userId        String
+  accessType    String    // "CHAPTER" | "SUBJECT" | "CLASS"
+  targetId      String
+  sourceOrderId String?
+  validFrom     DateTime  @default(now())
+  validUntil    DateTime? // null = Lifetime, or DateTime timestamp
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceOrder   Order?    @relation(fields: [sourceOrderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, accessType, targetId])
+}
+
+model ManualAccessLog {
+  id           String   @id @default(uuid())
+  adminId      String
+  targetUserId String
+  action       String   // "GRANT" | "REVOKE"
+  accessType   String   // "CHAPTER" | "SUBJECT" | "CLASS"
+  targetId     String
+  reason       String
+  createdAt    DateTime @default(now())
+
+  adminUser    User     @relation("AdminUser", fields: [adminId], references: [id], onDelete: Cascade)
+  targetUser   User     @relation("TargetUser", fields: [targetUserId], references: [id], onDelete: Cascade)
+}
